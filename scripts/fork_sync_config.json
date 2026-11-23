@@ -1,0 +1,27 @@
+{
+ "upstream_repo": "sgl-project/sgl-amd-mono",
+ "fork_repo": "rkarhila-amd/sgl-amd-mono",
+ "upstream_branch": "main",
+ "include_drafts": false,
+ "body_fallback": false,
+ "path_models": [
+  {"path": "^sgl_amd_mono/qwen38_flash_next/", "model": "qwen3.8fn"},
+  {"path": "^sgl_amd_mono/(qwen38_a95b_mxfp4|qwen3_8_dense)/", "model": "qwen3.8"},
+  {"path": "^sgl_amd_mono/deepseek_v41?/", "model": "dsv41"},
+  {"path": "^sgl_amd_mono/kimi_k31?/", "model": "kimik3"},
+  {"path": "^sgl_amd_mono/minimax_m31?/", "model": "mm3"},
+  {"path": "^sgl_amd_mono/glm53(_flash)?/", "model": "glm5"},
+  {"path": "^sgl_amd_mono/minimax/", "model": "minimax"},
+  {"path": "^sgl_amd_mono/muse_spark/", "model": "musespark"},
+  {"path": "^sgl_amd_mono/qwen35_a17b/", "model": "qwen3.5"}
+ ],
+ "models": [
+  {"name": "qwen3.8fn", "patterns": ["qwen38_flash_next", "qwen3\\.8-flash-next"]},
+  {"name": "qwen3.8", "patterns": ["qwen38_a95b", "qwen3_8_dense", "qwen3\\.8(?!-flash)"]},
+  {"name": "dsv41", "patterns": ["deepseek_v41?\\b", "deepseek[-_ ]?v4"]},
+  {"name": "kimik3", "patterns": ["kimi[-_ ]?k3"]},
+  {"name": "mm3", "patterns": ["minimax[-_ ]?m3"]},
+  {"name": "glm5", "patterns": ["glm[-_ ]?5"]}
+ ],
+ "union_paths": ["README.md", "NOTICE", "sgl_amd_mono/__init__.py"]
+}
