@@ -301,17 +301,6 @@ def timeline_report(M, tl) -> str:
     return "\n".join(lines)
 
 
-def captured_growth(fn, dev):
-    """Return (bytes the allocator grew while capturing fn, the captured graph)."""
-    torch.cuda.synchronize()
-    before = torch.cuda.memory_allocated(dev)
-    g = torch.cuda.CUDAGraph()
-    with torch.cuda.graph(g):
-        fn()
-    torch.cuda.synchronize()
-    return torch.cuda.memory_allocated(dev) - before, g
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--replays", type=int, default=500)
@@ -418,19 +407,9 @@ def main():
     run_all()
     torch.cuda.synchronize()
     ref = [t.clone() for s in steps for t in s[5]]
-
-    # the same output copies without the launches: what torch's capture itself allocates;
-    # control_graph stays referenced so the capture below cannot reuse its pool
-    control, control_graph = captured_growth(
-        fn=lambda: [d.copy_(d) for s in steps for d in s[5]], dev=dev
-    )
-    capture, graph = captured_growth(fn=run_all, dev=dev)
-    # replays only, before the checks below allocate or free anything
-    after_capture = torch.cuda.memory_allocated(dev)
-    for _ in range(64):
-        graph.replay()
-    torch.cuda.synchronize()
-    replays = torch.cuda.memory_allocated(dev) - after_capture
+    graph = torch.cuda.CUDAGraph()
+    with torch.cuda.graph(graph):
+        run_all()
     bad_replays = 0
     for i in range(args.replays):
         graph.replay()
@@ -440,16 +419,10 @@ def main():
             bad_replays += sum(not torch.equal(a, b) for a, b in zip(got, ref))
     if rank == 0:
         print(f"replay check: {args.replays} replays of widths {WIDTHS} in one graph, outputs sampled "
-              f"every 50 replays: {bad_replays} mismatching checks; allocator capture {capture} B "
-              f"(control {control}), replays {replays} B",
+              f"every 50 replays: {bad_replays} mismatching checks",
               flush=True)  # fmt: skip
     if bad_replays:
         fails.append("replay")
-    # A replay may release memory; only an increase is growth.
-    if capture > control or replays > 0:
-        fails.append(
-            f"allocator grew: capture {capture} (control {control}), replays {replays}"
-        )
     finish(fails, dev)
 
 

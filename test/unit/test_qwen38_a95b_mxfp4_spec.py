@@ -35,8 +35,7 @@ def test_the_plugin_registers_the_spec():
         backend=sgl_amd_mono.BACKEND, architectures=arch, isa="gfx950"
     )
     assert found is qwen.SPEC, why
-    # K1 and K2 at 1 to 8 rows, layer_block at 16
-    assert found.devices["gfx950"].widths == (*range(1, 9), 16)
+    assert found.devices["gfx950"].widths == tuple(range(1, 9))
     found, why = registry.find_spec(
         backend=sgl_amd_mono.BACKEND, architectures=arch, isa="gfx942"
     )

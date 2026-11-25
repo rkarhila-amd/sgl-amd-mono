@@ -65,6 +65,8 @@ python -m sglang.launch_server \
   --speculative-algorithm DSPARK \
   --speculative-dspark-block-size 5 \
   --fp8-gemm-backend aiter \
+  --enforce-shared-experts-fusion \
+  --enable-amd-monokernel
   --monokernel-backend amd
 ```
 
@@ -85,7 +87,7 @@ SGLANG_USE_AITER=1 python -m sglang.launch_server \
   --speculative-num-steps 3 \
   --speculative-eagle-topk 1 \
   --speculative-num-draft-tokens 4 \
-  --monokernel-backend amd
+  --enable-amd-monokernel
 ```
 
 The MXFP4 checkpoint `amd/GLM-5.3-Quark-MXFP4-AttnFP8` serves with the same flags,
@@ -103,6 +105,12 @@ python -m sglang.launch_server \
   --model-path amd/MiniMax-M3-MXFP4 \
   --tp 2 \
   --page-size 128 \
+  --speculative-algorithm EAGLE3 \
+  --speculative-draft-model-path Inferact/MiniMax-M3-EAGLE3-GQA \
+  --speculative-num-steps 3 \
+  --speculative-eagle-topk 1 \
+  --speculative-num-draft-tokens 4 \
+  --enable-amd-monokernel
   --kv-cache-dtype fp8_e4m3 \
   --attention-backend aiter \
   --monokernel-backend amd
@@ -144,7 +152,7 @@ SGLANG_USE_AITER=1 python -m sglang.launch_server \
   --tp 4 \
   --speculative-algorithm DSPARK \
   --fp8-gemm-backend aiter \
-  --monokernel-backend amd
+  --enable-amd-monokernel
 ```
 
 DeepSeek-V4-Pro, on SGLang's two-pool fp8 unified KV:
@@ -160,7 +168,7 @@ AITER_BF16_FP8_MOE_BOUND=0 python -m sglang.launch_server \
   --kv-cache-dtype fp8_e4m3 \
   --disable-shared-experts-fusion \
   --cuda-graph-max-bs-decode 8 \
-  --monokernel-backend amd
+  --enable-amd-monokernel
 ```
 
 `AITER_BF16_FP8_MOE_BOUND=0` makes SGLang's decode run the routed experts on
@@ -176,7 +184,7 @@ SGLANG_USE_AITER=1 python -m sglang.launch_server \
   --attention-backend aiter \
   --kv-cache-dtype fp8_e4m3 \
   --mamba-ssm-dtype bfloat16 \
-  --monokernel-backend amd
+  --enable-amd-monokernel
 ```
 
 The serving test uses more flags (`test/e2e/qwen38_a95b_mxfp4_server.py`).
@@ -196,7 +204,7 @@ SGLANG_USE_AITER=1 AITER_BF16_FP8_MOE_BOUND=0 python -m sglang.launch_server \
   --attention-backend aiter \
   --moe-runner-backend aiter \
   --cuda-graph-config '{"decode":{"backend":"full","max_bs":8,"bs":[1,2,3,4,5,6,7,8]}}' \
-  --monokernel-backend amd
+  --enable-amd-monokernel
 ```
 
 The same model with MTP (EAGLE, 3 steps, top-k 1, 4 draft tokens), where the
@@ -218,7 +226,7 @@ python -m sglang.launch_server \
   --speculative-eagle-topk 1 \
   --speculative-num-draft-tokens 4 \
   --cuda-graph-config '{"decode":{"backend":"full","max_bs":8,"bs":[1,2,3,4,5,6,7,8]}}' \
-  --monokernel-backend amd
+  --enable-amd-monokernel
 ```
 
 Qwen3.8-Flash-Next, with its MTP head (one MI355X; the server flags of `test/e2e/qwen38_flash_next_server.py`, which also caps running requests at 16 to step past 8):
@@ -235,7 +243,7 @@ python -m sglang.launch_server \
   --speculative-eagle-topk 1 \
   --speculative-num-draft-tokens 4 \
   --cuda-graph-max-bs-decode 8 \
-  --monokernel-backend amd
+  --enable-amd-monokernel
 ```
 
 If the model, GPU or configuration is not supported, the server refuses to start and lists every reason.
